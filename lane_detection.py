@@ -63,9 +63,12 @@ def detect_lanes(lines):
             #     i += 1
             #     print("added i")
             for j in range (i+1,len(slopeList)):
-                print(f"DistREQ:{abs(xInterceptList[i]-xInterceptList[j])}")
-                print(f"slopeREQ:{abs(1/ slopeList[i]-1 /slopeList[j])}")
-                if(abs(xInterceptList[i]-xInterceptList[j])< 10000 and abs(1/ slopeList[i]-1 /slopeList[j]) < 1):
+                
+                InterceptDist = abs(xInterceptList[i]-xInterceptList[j])
+                slopeDiff = abs(1/ slopeList[i]-1 /slopeList[j]) 
+                #print(f"DistREQ:{abs(xInterceptList[i]-xInterceptList[j])}")
+                #print(f"slopeREQ:{abs(1/ slopeList[i]-1 /slopeList[j])}")
+                if(InterceptDist > 100 and InterceptDist< 10000 and slopeDiff< 1):
                     
                     xPoint = ((slopeList[i] * xInterceptList[i]) - (slopeList[j] * xInterceptList[j]))/(slopeList[i]-slopeList[j])
                     yPoint = slopeList[i]*(xPoint - xInterceptList[i]) + 1080
@@ -112,7 +115,7 @@ def draw_lanes(img,lanes,color = (255, 0, 0)):
     return img
 
 def draw_Single_lane(img,lanes,color = (255, 0, 0)):
-    color = (randrange(255),randrange(255),randrange(255))
+    #color = (randrange(255),randrange(255),randrange(255))
     for lane in lanes:
         
         x1, y1, x2, y2 = lane
