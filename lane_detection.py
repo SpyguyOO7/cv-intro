@@ -19,7 +19,7 @@ def detect_lines(img,threshold1 = 50,threshold2 = 150,apertureSize = 3,minLineLe
             maxLineGap = maxLineGap,
 
     )
-    print (lines)
+    #print (lines)
     #be close enough, have similar slopes, be on the same side of the image
     return lines
 
@@ -53,8 +53,8 @@ def get_slopes_intercepts(lines):
 
 def detect_lanes(lines):
     slopeList, xInterceptList = get_slopes_intercepts(lines)
-    print (f"slopeList:{slopeList}")
-    print (f"xInterceptList:{xInterceptList}")
+    #print (f"slopeList:{slopeList}")
+    #print (f"xInterceptList:{xInterceptList}")
     lanes = []
     #check of the lines intersect on the screen
     if len(slopeList)> 1:
@@ -75,8 +75,8 @@ def detect_lanes(lines):
                     
                     # avgSlope = (slopeList[i]+ slopeList[j])/2
                     # avgInterecept = (xInterceptList[i]+xInterceptList[j])/2
-                    lane1 = [xInterceptList[i], 1080, xPoint,yPoint]
-                    lane2 = [xInterceptList[j], 1080, xPoint,yPoint]
+                    lane1 = [xInterceptList[i], 1080, xPoint, yPoint]
+                    lane2 = [xInterceptList[j], 1080, xPoint, yPoint]
                     addedlanes = [lane1,lane2]
                     #print (f"thiasdfee:{(slopeList[i] * xInterceptList[i]) - slopeList[j] * xInterceptList[j]}")
                     lanes.append(addedlanes)
@@ -100,7 +100,7 @@ def pick_lane(lanes):
         if (maxDiff < diff):
             maxDiff = diff
             pickedLane = addedLanes
-    print(f"picked: {pickedLane}")
+    #print(f"picked: {pickedLane}")
     return pickedLane
 
 def draw_lanes(img,lanes,color = (255, 0, 0)):
@@ -109,8 +109,8 @@ def draw_lanes(img,lanes,color = (255, 0, 0)):
         for lane in addedLanes:
             
             x1, y1, x2, y2 = lane
-            print ("type(x1)")
-            print (lane)
+       #     print ("type(x1)")
+         #  print (lane)
             cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 6)
     return img
 
@@ -119,7 +119,7 @@ def draw_Single_lane(img,lanes,color = (255, 0, 0)):
     for lane in lanes:
         
         x1, y1, x2, y2 = lane
-        print ("type(x1)")
-        print (lane)
+       # print ("type(x1)")
+      #  print (lane)
         cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 6)
     return img
