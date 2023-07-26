@@ -56,25 +56,28 @@ def detect_lanes(lines):
     print (f"xInterceptList:{xInterceptList}")
     lanes = []
     #check of the lines intersect on the screen
-    for i in range(0,len(slopeList)):
-        # if (len(slopeList) > 1):
-        #     i += 1
-        #     print("added i")
-        for j in range (i,len(slopeList)):
-            if(abs(xInterceptList[i]-xInterceptList[j])< 500):
-                #print(f"xInterceptList:{xInterceptList[i]}")
-                avgSlope = (slopeList[i]+ slopeList[j])/2
-                avgInterecept = (xInterceptList[i]+xInterceptList[j])/2
-                
-                lane = [avgInterecept, 1080, (100)+avgInterecept,(avgSlope)* -100   +1080]
-                print (f"lane:{lane}")
-                lanes.append(lane)
+    if len(slopeList)> 1:
+        for i in range(0,len(slopeList)):
+            # if (len(slopeList) > 1):
+            #     i += 1
+            #     print("added i")
+            for j in range (i+1,len(slopeList)):
+                if(abs(xInterceptList[i]-xInterceptList[j])< 500):
+                    xPoint = ((slopeList[i] * xInterceptList[i]) - (slopeList[j] * xInterceptList[j]))/(slopeList[i]-slopeList[j])
+                    yPoint = slopeList[i]*(xPoint - xInterceptList[i]) + 1080
+                    
+                    # avgSlope = (slopeList[i]+ slopeList[j])/2
+                    # avgInterecept = (xInterceptList[i]+xInterceptList[j])/2
+                    lane1 = [xInterceptList[i], 1080, xPoint,yPoint]
+                    lane2 = [xInterceptList[j], 1080, xPoint,yPoint]
+                    addedlanes = [lane1,lane2]
+                    #print (f"thiasdfee:{(slopeList[i] * xInterceptList[i]) - slopeList[j] * xInterceptList[j]}")
+                    lanes.append(addedlanes)
 
 
             #lanes.append(lane)
 
-            #xPoint = ((slopeList[i] * xInterceptList[i]) - (slopeList[j] * xInterceptList[j]))/(slopeList[i]-slopeList[j])
-            #yPoint = slopeList[i]*(xPoint - xInterceptList[i])
+            #
 
             # if (yPoint> -500 and yPoint< 1080):
             #     avgInterceptX = (xInterceptList[i] + xInterceptList[j])/2
@@ -84,9 +87,10 @@ def detect_lanes(lines):
     return lanes
 
 def draw_lanes(img,lanes,color = (255, 0, 0)):
-    for lane in lanes:
-        x1, y1, x2, y2 = lane
-        print ("type(x1)")
-        print (type(x1))
-        cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 6)
+    for addedLanes in lanes:
+        for lane in addedLanes:
+            x1, y1, x2, y2 = lane
+            print ("type(x1)")
+            print (lane)
+            cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 6)
     return img
