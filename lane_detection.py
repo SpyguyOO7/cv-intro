@@ -1,4 +1,5 @@
 import cv2
+from random import randrange
 import numpy as np
 import matplotlib.pyplot as plt
 #from dt_apriltags import Detector
@@ -36,9 +37,9 @@ def get_slopes_intercepts(lines):
         x1, y1, x2, y2 = line[0]
         slope = (y1-y2)/(x1-x2)
         xIntercept = ((((1080 - y1)/slope)  )+ x1)
-        slope = round(slope, 0)
-        if not slope in resultSet:
-            resultSet.add(slope) 
+        roundXIntercept = round(xIntercept, 0)
+        if not roundXIntercept in resultSet:
+            resultSet.add(roundXIntercept) 
             xInterceptList.append(xIntercept)
         #    resultSet[slope][1] += 1 # keep a counter of how many lines have been iterated through and added to the one slope for averaging later
             slopeList.append(slope) 
@@ -62,7 +63,10 @@ def detect_lanes(lines):
             #     i += 1
             #     print("added i")
             for j in range (i+1,len(slopeList)):
-                if(abs(xInterceptList[i]-xInterceptList[j])< 500):
+                print(f"DistREQ:{abs(xInterceptList[i]-xInterceptList[j])}")
+                print(f"slopeREQ:{abs(1/ slopeList[i]-1 /slopeList[j])}")
+                if(abs(xInterceptList[i]-xInterceptList[j])< 10000 and abs(1/ slopeList[i]-1 /slopeList[j]) < 1):
+                    
                     xPoint = ((slopeList[i] * xInterceptList[i]) - (slopeList[j] * xInterceptList[j]))/(slopeList[i]-slopeList[j])
                     yPoint = slopeList[i]*(xPoint - xInterceptList[i]) + 1080
                     
@@ -86,11 +90,33 @@ def detect_lanes(lines):
 
     return lanes
 
+def pick_lane(lanes):
+    maxDiff = 0
+    for addedLanes in lanes:
+        diff = abs(addedLanes[0][0]  - addedLanes[1][0])
+        if (maxDiff < diff):
+            maxDiff = diff
+            pickedLane = addedLanes
+    print(f"picked: {pickedLane}")
+    return pickedLane
+
 def draw_lanes(img,lanes,color = (255, 0, 0)):
     for addedLanes in lanes:
+        color = (randrange(255),randrange(255),randrange(255))
         for lane in addedLanes:
+            
             x1, y1, x2, y2 = lane
             print ("type(x1)")
             print (lane)
             cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 6)
+    return img
+
+def draw_Single_lane(img,lanes,color = (255, 0, 0)):
+    color = (randrange(255),randrange(255),randrange(255))
+    for lane in lanes:
+        
+        x1, y1, x2, y2 = lane
+        print ("type(x1)")
+        print (lane)
+        cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), color, 6)
     return img
