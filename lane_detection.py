@@ -9,6 +9,8 @@ def detect_lines(img,threshold1 = 50,threshold2 = 150,apertureSize = 3,minLineLe
     """ takes an image as an input and returns a list of detected lines"""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # convert to grayscale
     blurred_image = cv2.GaussianBlur(gray, (9, 9), 0)
+    #plt.imshow(cv2.cvtColor(blurred_image, cv2.COLOR_BGR2RGB))
+    #plt.show()
     edges = cv2.Canny(blurred_image, threshold1, threshold2, apertureSize) # detect edges
     lines = cv2.HoughLinesP(
             edges,
@@ -18,7 +20,10 @@ def detect_lines(img,threshold1 = 50,threshold2 = 150,apertureSize = 3,minLineLe
             minLineLength = minLineLength,
             maxLineGap = maxLineGap,
 
+
     )
+    #plt.imshow(cv2.cvtColor(edges, cv2.COLOR_BGR2RGB))
+    #plt.show()
     #print (lines)
     #be close enough, have similar slopes, be on the same side of the image
     return lines
