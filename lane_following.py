@@ -3,6 +3,7 @@ from random import randrange
 import numpy as np
 import matplotlib.pyplot as plt
 #from dt_apriltags import Detector
+from lane_detection import *
 import matplotlib.cm as cm
 
 def get_lane_center(lanes):
@@ -24,17 +25,26 @@ def draw_center_lane(img, center_intercept, center_slope, xPoint = 0, yPoint = 0
 def recommend_direction(center, slope):
     
     halfOfRes = 1920/2
-    if center == halfOfRes:
-        direction = "forward"
-    elif center > halfOfRes:# more than halfway
+    HorizontalDiff = halfOfRes-center
+    centerTolerance = 2.5
+    if abs(HorizontalDiff) < centerTolerance:
+        direction = "Go Forward!"
+    elif HorizontalDiff > 0:# more than halfway
         #print("strafe right")
-        direction = "right"
+        direction = f"Strafe Left by {HorizontalDiff}"
     else:
         #print("strafe left")
-        direction = "left"
-    if 1/slope > 0:
+        direction = f"Strafe Right by {HorizontalDiff}"
+
+    AproxAUVAngle = 90 - angle_between_lines(slope, 0)  
+    # get the approx angle of the auv with the line by calculating the slope of the 
+    #center line with a horizontal line relative to the rov
+    if slope > 0:
+        AproxAUVAngle = -AproxAUVAngle
+        direction += f" turn Left by: {AproxAUVAngle} degrees"
         pass#print("turn right")
-    if 1/slope < 0:
+    if slope < 0:
+        direction += f" turn Right by: {AproxAUVAngle} degrees"
         pass#print("turn Left")
     return direction
     
