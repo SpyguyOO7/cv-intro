@@ -9,3 +9,4 @@ def putTagsOnImage(img,tags):
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale=0.8,
                     color=(0, 0, 255))
+        

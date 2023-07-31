@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 #from dt_apriltags import Detector
 import matplotlib.cm as cm
 import math
+
+def crop_bottom_half(image):
+    cropped_img = image[int(image.shape[0]/2):image.shape[0]]
+    return cropped_img
+
 def angle_between_lines(m1, m2):
     """
     Calculate the angle between two lines given their slopes.
@@ -20,8 +25,8 @@ def detect_lines(img,threshold1 = 50,threshold2 = 150,apertureSize = 3,minLineLe
     #blurred_image = cv2.GaussianBlur(img, (9, 9), cv2.BORDER_DEFAULT)
     """ takes an image as an input and returns a list of detected lines"""
     # converting to LAB color space
-    
-    lab= cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    croppedImg = crop_bottom_half(img)
+    lab= cv2.cvtColor(croppedImg, cv2.COLOR_BGR2LAB)
     l_channel, a, b = cv2.split(lab)
 
     # Applying CLAHE to L-channel
@@ -57,15 +62,23 @@ def detect_lines(img,threshold1 = 50,threshold2 = 150,apertureSize = 3,minLineLe
             minLineLength = minLineLength,
             maxLineGap = maxLineGap,
 
-
     )
     #plt.imshow(cv2.cvtColor(edges, cv2.COLOR_BGR2RGB))
     #plt.show()
     #print (lines)
+    lines = PutLinesDown(lines)
     #be close enough, have similar slopes, be on the same side of the image
     return lines
 
+def PutLinesDown(lines):
+    screenThing = imgPixelHeight/2
+    for line in lines:
+        line[0][1] += screenThing
+        line[0][3] += screenThing
+    return lines
+
 def draw_lines(img,lines,color = (0, 255, 0)):
+    halfScreen = imgPixelHeight/2
     for line in lines:
         x1, y1, x2, y2 = line[0]
         cv2.line(img, (x1, y1), (x2, y2), color, 6)
@@ -80,7 +93,7 @@ def get_slopes_intercepts(lines):
         slope = (y1-y2)/(x1-x2)
         if slope == 0:
             slope = 0.001
-        xIntercept = ((((1080 - y1)/slope)  )+ x1)
+        xIntercept = ((((imgPixelHeight - y1)/slope)  )+ x1)
         roundXIntercept = round(xIntercept, 0)
         if not roundXIntercept in resultSet:
             resultSet.add(roundXIntercept) 
@@ -119,15 +132,16 @@ def detect_lanes(lines):
                 #print(f"DistREQ:{abs(xInterceptList[i]-xInterceptList[j])}")
                 #print(f"slopeREQ:{abs(1/ slopeList[i]-1 /slopeList[j])}")
                 # if statement to make sure lane is not too big (multiple lanes as one) not too different in slope (wrong side/ different lanes) and not too horizontal (other lienes reced as pool lane)
+                
                 if(InterceptDist > 100 and InterceptDist< 750 and slopeDiff< 1 and abs(slopeThing) < 3 ):
                     #print(f"1/ slope:{slopeThing}")
                     xPoint = ((slopeList[i] * xInterceptList[i]) - (slopeList[j] * xInterceptList[j]))/(slopeList[i]-slopeList[j])
-                    yPoint = slopeList[i]*(xPoint - xInterceptList[i]) + 1080
+                    yPoint = slopeList[i]*(xPoint - xInterceptList[i]) + imgPixelHeight
                     
                     # avgSlope = (slopeList[i]+ slopeList[j])/2
                     # avgInterecept = (xInterceptList[i]+xInterceptList[j])/2
-                    lane1 = [xInterceptList[i], 1080, xPoint, yPoint]
-                    lane2 = [xInterceptList[j], 1080, xPoint, yPoint]
+                    lane1 = [xInterceptList[i], imgPixelHeight, xPoint, yPoint]
+                    lane2 = [xInterceptList[j], imgPixelHeight, xPoint, yPoint]
                     addedlanes = [lane1,lane2]
                     #print (f"thiasdfee:{(slopeList[i] * xInterceptList[i]) - slopeList[j] * xInterceptList[j]}")
                     lanes.append(addedlanes)
@@ -165,7 +179,7 @@ def pick_lane(lanes):
         diff = abs(addedLanes[0][0]  - addedLanes[1][0])
         yPoint = addedLanes[0][3]
         #print(f"yPoint:{yPoint}")
-        VertDistToCenter = abs(yPoint - (1080/2))
+        VertDistToCenter = abs(yPoint - (imgPixelHeight/2))
         xPoint = addedLanes[0][2]
         HortDistToCenter = abs(xPoint - (1920/2))
         trueDistToCenter = np.sqrt(pow(VertDistToCenter,2)+pow(HortDistToCenter,2))
@@ -173,7 +187,7 @@ def pick_lane(lanes):
         #print (f"diff:{diff}")
         #print (f"center_slope:{center_slope}")
         #laneFitness = diff - trueDistToCenter/2 + center_slope # calculate fitness, bigger = better, closer to center = better, lower centerline slope = better
-        laneFitness = LineAngle #use lineangle as a analog for how close the lane is 
+        laneFitness = LineAngle * 10- VertDistToCenter #use lineangle as a analog for how close the lane is 
         print (laneFitness)
         
         if (maxLaneFitness < laneFitness and LineAngle < 50):
